@@ -5,11 +5,14 @@ namespace App\Filament\Resources;
 use Filament\Forms;
 use Filament\Tables;
 use App\Models\Produk;
+use Filament\Forms\Set;
 use Filament\Forms\Form;
+use App\Models\Pembelian;
 use Filament\Tables\Table;
 use Illuminate\Support\Arr;
 use App\Models\DetailPembelian;
 use Filament\Resources\Resource;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
@@ -26,85 +29,73 @@ class DetailPembelianResource extends Resource
 
     public static function form(Form $form): Form
     {
+        $pembelian = new Pembelian();
+        $pembelianId = request('pembelian_id');
+        if(request()->filled('pembelian_id'))
+        $pembelian = Pembelian::findOrFail($pembelianId);
         return $form
             ->schema([
-                // Header Pembelian (diasumsikan sudah diisi lewat route atau data form)
                 TextInput::make('tanggal_pembelian')
                     ->label('Tanggal Pembelian')
                     ->disabled()
-                    ->columnSpanFull(),
+                    ->columnSpanFull()
+                    ->default($pembelian->tanggal_pembelian),
                 TextInput::make('supplier_nama')
                     ->label('Supplier')
-                    ->disabled(),
+                    ->disabled()
+                    ->default($pembelian->supplier?->nama_perusahaan),
                 TextInput::make('nomor_telepon')
                     ->label('Nomor Telepon')
+                    ->disabled()
+                    ->default($pembelian->supplier?->nomor_telepon),
+                Hidden::make('pembelian_id')
+                    ->default($pembelian->id),
+                Hidden::make('supplier_id')
+                    ->default($pembelian->supplier_id),
+                Select::make('produk_id')
+                    ->label('Pilih Produk')
+                    ->options(function (callable $get) {
+                        $supplierId = $get('supplier_id');
+                        return Produk::query()
+                            ->when($supplierId, function ($query) use ($supplierId) {
+                                $query->whereHas('suppliers', function ($q) use ($supplierId) {
+                                    $q->where('suppliers.id', $supplierId);
+                                });
+                            })
+                            ->pluck('nama_produk', 'id')
+                            ->toArray();
+                    })
+                    ->required()
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, Set $set) {
+                        $produk = Produk::find($state);
+                        $set('harga', $produk->harga);
+                    }),
+                TextInput::make('harga')
+                    ->label('Harga')
                     ->disabled(),
-
-                // Repeater untuk detail pembelian
-                Repeater::make('detail')
-                    ->label('Produk yang Dibeli')
-                    ->columnSpan(2)
-                    ->schema([
-                        // Pilih Produk (hanya produk dari supplier yang sudah dipilih)
-                        Select::make('produk_id')
-                            ->label('Pilih Produk')
-                            ->options(function (callable $get) {
-                                $supplierId = $get('supplier_id');
-                                return Produk::query()
-                                    ->when($supplierId, function ($query) use ($supplierId) {
-                                        $query->whereHas('suppliers', function ($q) use ($supplierId) {
-                                            $q->where('suppliers.id', $supplierId);
-                                        });
-                                    })
-                                    ->pluck('nama_produk', 'id')
-                                    ->toArray();
-                            })
-                            ->required(),
-
-                        // Input Jumlah Produk
-                        TextInput::make('jumlah_produk')
-                            ->label('Jumlah Produk')
-                            ->numeric()
-                            ->minValue(1)
-                            ->required()
-                            ->reactive()
-                            ->debounce(1000)
-                            ->afterStateUpdated(function (callable $get, callable $set, $state) {
-                                $produkId = $get('produk_id');
-                                $produk = Produk::find($produkId);
-                                $harga = $produk ? $produk->harga : 0;
-                                $set('subtotal', $harga * $state);
-                            })
-                            ,
-
-                        // Subtotal, dihitung otomatis dan tidak bisa diubah langsung
-                        TextInput::make('subtotal')
-                            ->label('Subtotal')
-                            ->numeric()
-                            ->disabled()
-                            ->reactive(),
-                    ])
-                    ->columns(3)
-                    ->minItems(1)
-                    ->createItemButtonLabel('Tambah Produk')
-                    // Secara default, repeater sudah mengizinkan edit dan hapus item
-                    ->disableItemDeletion(false),
-
-                // Total Harga, dihitung sebagai jumlah dari seluruh subtotal detail
-                TextInput::make('total_harga')
-                    ->label('Total Harga')
+                TextInput::make('jumlah_produk')
+                    ->label('Jumlah Produk')
+                    ->numeric()
+                    ->minValue(1)
+                    ->required()
+                    ->reactive()
+                    ->debounce(600)
+                    ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                        $harga = $get('harga');
+                        if ($state) {
+                            $set('subtotal', $harga * $state);
+                        } else {
+                            $set('subtotal', 0);
+                        }
+                    }),
+                // Subtotal, dihitung otomatis dan tidak bisa diubah langsung
+                TextInput::make('subtotal')
+                    ->label('Subtotal')
+                    ->numeric()
                     ->disabled()
                     ->reactive()
-                    ->afterStateHydrated(function (callable $get, callable $set) {
-                        $details = $get('detail') ?? [];
-                        $total = collect($details)->sum(fn ($item) => Arr::get($item, 'subtotal', 0));
-                        $set('total_harga', $total);
-                    })
-                    ->afterStateUpdated(function (callable $get, callable $set) {
-                        $details = $get('detail') ?? [];
-                        $total = collect($details)->sum(fn ($item) => Arr::get($item, 'subtotal', 0));
-                        $set('total_harga', $total);
-                    }),
+                    ->dehydrated(),
             ]);
     }
 
@@ -127,18 +118,6 @@ class DetailPembelianResource extends Resource
             ]);
     }
 
-    public static function afterSave($record, array $data): void
-    {
-        // Ambil ID pembelian dari salah satu record detail (asumsi semua detail milik pembelian yang sama)
-        $pembelianId = $record->pembelian_id;
-
-        // Hitung total harga berdasarkan data repeater yang disubmit (jika tersedia)
-        $total = collect($data['detail'] ?? [])
-            ->sum(fn ($item) => $item['subtotal'] ?? 0);
-
-        // Update record pembelian
-        \App\Models\Pembelian::find($pembelianId)->update(['total_harga' => $total]);
-    }
 
     public static function getRelations(): array
     {

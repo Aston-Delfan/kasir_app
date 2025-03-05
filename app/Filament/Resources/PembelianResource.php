@@ -39,6 +39,7 @@ class PembelianResource extends Resource
                     ->options(Supplier::all()->pluck('nama_perusahaan', 'id'))
                     ->searchable()
                     ->required()
+                    ->debounce(100)
                     ->createOptionForm(SupplierResource::getForm())
                     ->createOptionUsing(fn (array $data): int => Supplier::create($data)->id)
                     ->reactive()

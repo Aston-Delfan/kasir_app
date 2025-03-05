@@ -44,9 +44,13 @@ class SupplierResource extends Resource
             Select::make('produk_id')
                 ->label('Pilih Produk')
                 ->multiple()
-                ->options(Produk::all()->pluck('nama_produk', 'id'))
-                ->relationship('produks', 'nama_produk')
                 ->searchable()
+                ->preload()
+                ->createOptionForm(ProdukResource::getForm())
+                ->createOptionUsing(fn (array $data): int => Produk::create($data)->id)
+                ->relationship('produks', 'nama_produk')
+                // ->options(Produk::all()
+                // ->pluck('nama_produk', 'id'))
                 // ->createOptionForm(ProdukResource::getForm())
                 // ->createOptionUsing(function (array $data): int {
                 //     return Produk::create($data)->id;

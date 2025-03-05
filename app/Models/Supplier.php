@@ -8,12 +8,16 @@ class Supplier extends Model
 {
     protected $table = 'suppliers';
 
+    protected $casts = [
+        'produk_id' => 'array',
+    ];
     protected $fillable = [
         'nama_perusahaan',
         'nama_kontak',
         'nomor_telepon',
         'email',
         'alamat',
+        'produk_id',
     ];
     public function pembelians()
     {

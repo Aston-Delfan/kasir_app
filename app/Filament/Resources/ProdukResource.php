@@ -37,17 +37,6 @@ class ProdukResource extends Resource
                     'admin'=> 'Admin',
                 ])
                 ->default('operator'),
-            Select::make('supplier_id')
-                ->label('Pilih Supplier')
-                ->multiple()
-                ->options(Supplier::all()->pluck('nama_perusahaan', 'id'))
-                ->relationship('suppliers', 'nama_perusahaan')
-                ->searchable()
-                // ->createOptionForm(SupplierResource::getForm())
-                // ->createOptionUsing(function (array $data): int {
-                //     return Supplier::create($data)->id;
-                // }),
-                ,
             TextInput::make('stok')
                 ->label('Stok Awal')
                 ->disabledOn('edit'),
@@ -79,9 +68,6 @@ class ProdukResource extends Resource
                     ->searchable(),
                 TextColumn::make('harga')
                     ->searchable(),
-                TagsColumn::make('suppliers.nama_perusahaan')
-                    ->label('Supplier')
-                    ->separator(', '),
             ])
             ->filters([
                 //
