@@ -22,6 +22,8 @@ class PelangganResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
     protected static ?string $label = 'Data Pelanggan';
+    protected static ?string $navigationLabel = 'Pelanggan';
+    protected static ?string $navigationGroup = 'Data Pelanggan & Supplier';
 
     public static function getForm(){
         return[

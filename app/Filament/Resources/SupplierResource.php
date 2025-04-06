@@ -25,6 +25,8 @@ class SupplierResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
     protected static ?string $label = 'Data Supplier';
+    protected static ?string $navigationLabel = 'Supplier';
+    protected static ?string $navigationGroup = 'Data Pelanggan & Supplier';
 
     public static function getForm(){
         return[

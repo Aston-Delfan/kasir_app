@@ -79,6 +79,7 @@ class DetailPenjualanResource extends Resource
                             ->label('Harga')
                             ->disabled()
                             ->prefix('Rp ')
+                            ->dehydrated()
                         ,
                         TextInput::make('jumlah_produk')
                             ->label('Jumlah Produk')
@@ -89,7 +90,7 @@ class DetailPenjualanResource extends Resource
                             ->debounce(600)
                             ->afterStateUpdated(function ($state, Get $get, Set $set) {
                                 $jumlah = $state;
-                                $harga = $get('harga');
+                                $harga = $get('harga') ?: 0;
                                 $subtotal = $jumlah * $harga;
                                 $set('subtotal', $subtotal);
                             }),
@@ -100,6 +101,7 @@ class DetailPenjualanResource extends Resource
                             ->disabled()
                             ->reactive()
                             ->dehydrated()
+                            ->default(0)
                             ->prefix('Rp ')
                         ,
                 ])->columns(4),

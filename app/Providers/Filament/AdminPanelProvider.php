@@ -57,14 +57,19 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
+            ->navigationGroups([
+                'Transaksi',
+                'Laporan',
+            ])
             ->plugins([
                 FilamentEditProfilePlugin::make()
                 ->setTitle('Profil Saya')
                 ->setNavigationLabel('Profil Saya')
                 ->setIcon('heroicon-o-user')
+                ->setNavigationGroup('Manajemen Pengguna')
                 ->shouldShowAvatarForm(
-                    value: true,
-                )
+                    value: true
+                ),
             ])
             ->userMenuItems([
                 MenuItem::make()

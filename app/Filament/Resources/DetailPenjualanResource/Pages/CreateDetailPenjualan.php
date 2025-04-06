@@ -38,7 +38,7 @@ class CreateDetailPenjualan extends CreateRecord
     {
         return [
             DetailPenjualanWidget::make([
-                'record' => request('pembelian_id'),
+                'record' => request('penjualan_id'),
          ]),
         ];
     }

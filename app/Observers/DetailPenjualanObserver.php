@@ -64,7 +64,6 @@ class DetailPenjualanObserver
         $total = DetailPenjualan::where('penjualan_id', $penjualanId)->sum('subtotal');
         $penjualan = \App\Models\Penjualan::find($penjualanId);
         if ($penjualan) {
-            $penjualan->total_harga = $total;
             $penjualan->save();
         }
     }

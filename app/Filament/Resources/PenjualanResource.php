@@ -24,6 +24,7 @@ class PenjualanResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
     protected static ?string $label = 'Data Penjualan';
+    protected static ?string $navigationLabel = 'Penjualan';
     protected static ?string $navigationGroup = 'Transaksi';
 
     public static function form(Form $form): Form
@@ -83,6 +84,7 @@ class PenjualanResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -94,7 +96,7 @@ class PenjualanResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\DetailPenjualansRelationManager::class,
         ];
     }
 
@@ -104,6 +106,7 @@ class PenjualanResource extends Resource
             'index' => Pages\ListPenjualans::route('/'),
             'create' => Pages\CreatePenjualan::route('/create'),
             'edit' => Pages\EditPenjualan::route('/{record}/edit'),
+            'view' => Pages\ViewPenjualan::route('/{record}'),
         ];
     }
 }

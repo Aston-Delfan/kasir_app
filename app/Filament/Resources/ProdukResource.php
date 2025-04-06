@@ -26,7 +26,7 @@ class ProdukResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-tag';
     protected static ?string $label = 'Data Produk';
     protected static ?string $navigationLabel = 'Produk';
-    protected static ?string $navigationGroup = 'Produk Management';
+    protected static ?string $navigationGroup = 'Manajemen Produk';
 
     public static function getForm(){
         return[
