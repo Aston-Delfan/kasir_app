@@ -36,27 +36,30 @@ class PenjualanResource extends Resource
                     ->default(now())
                     ->required()
                     ->columnSpanFull(),
-                // Select pelanggan dengan create option
+                // Select pelanggan with nullable option
                 Select::make('pelanggan_id')
                     ->label('Pilih Pelanggan')
                     ->options(Pelanggan::all()->pluck('nama_pelanggan', 'id'))
                     ->searchable()
-                    ->nullable()
+                    ->nullable() // Allow null selection
                     ->debounce(600)
                     ->createOptionForm(PelangganResource::getForm())
                     ->createOptionUsing(fn (array $data): int => Pelanggan::create($data)->id)
                     ->reactive()
                     ->afterStateUpdated(function ($state, callable $set) {
-                        $pelanggan = Pelanggan::find($state);
-                        $set('nomor_telepon', $pelanggan->nomor_telepon ?? null);
+                        if ($state) {
+                            $pelanggan = Pelanggan::find($state);
+                            $set('nomor_telepon', $pelanggan->nomor_telepon ?? null);
+                        } else {
+                            $set('nomor_telepon', null);
+                        }
                     })
-                    ->default("-"),
+                    ->placeholder('Tanpa Pelanggan'), // Add a placeholder to indicate no selection
                 // Nomor telepon, hanya untuk tampil, disabled
                 TextInput::make('nomor_telepon')
                     ->label('Nomor Telepon')
                     ->disabled()
-                    ->nullable()
-                    ->default("-"),
+                    ->nullable(),
             ]);
     }
 
