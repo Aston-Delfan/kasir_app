@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\ProdukResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\ProdukResource\RelationManagers;
+use App\Models\Category;
 
 class ProdukResource extends Resource
 {
@@ -24,19 +25,30 @@ class ProdukResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-tag';
     protected static ?string $label = 'Data Produk';
+    protected static ?string $navigationLabel = 'Produk';
+    protected static ?string $navigationGroup = 'Produk Management';
 
     public static function getForm(){
         return[
             TextInput::make('nama_produk')
                 ->label('Nama Produk')
                 ->required(),
-            Select::make('kategori')
+            Select::make('category_id')
                 ->label('Kategori')
-                ->options([
-                    'operator'=> 'Operator',
-                    'admin'=> 'Admin',
+                ->relationship('category', 'nama_kategori')
+                ->createOptionForm([
+                    Forms\Components\TextInput::make('nama_kategori')
+                        ->label('Nama Kategori')
+                        ->required()
+                        ->maxLength(255),
+                    Forms\Components\TextInput::make('deskripsi')
+                        ->label('Deskripsi')
+                        ->maxLength(255),
                 ])
-                ->default('operator'),
+                ->createOptionUsing(fn (array $data) => Category::create($data)->id)
+                ->searchable()
+                ->preload()
+                ->required(),
             TextInput::make('stok')
                 ->label('Stok Awal')
                 ->disabledOn('edit'),
@@ -62,7 +74,8 @@ class ProdukResource extends Resource
             ->columns([
                 TextColumn::make('nama_produk')
                     ->searchable(),
-                TextColumn::make('kategori')
+                    TextColumn::make('category.nama_kategori')
+                    ->label('Kategori')
                     ->searchable(),
                 TextColumn::make('stok')
                     ->searchable(),

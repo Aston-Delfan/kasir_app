@@ -11,6 +11,7 @@ class Produk extends Model
     protected $fillable = [
         'kode',
         'nama_produk',
+        'category_id',
         'kategori',
         'stok',
         'harga',
@@ -23,5 +24,9 @@ class Produk extends Model
     public function detailPembelians()
     {
         return $this->hasMany(DetailPembelian::class);
+    }
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
     }
 }
