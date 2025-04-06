@@ -23,24 +23,27 @@ class PelangganResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
     protected static ?string $label = 'Data Pelanggan';
 
-
+    public static function getForm(){
+        return[
+            TextInput::make('nama_pelanggan')
+                ->label('Nama')
+                ->maxLength(255)
+                ->minLength(2)
+                ->required(),
+            TextInput::make('nomor_telepon')
+                ->label('Nomor Telepon')
+                ->tel()
+                ->unique(ignoreRecord: true),
+            TextArea::make('alamat')
+                ->label('Alamat')
+                ->columnSpanFull(),
+        ];
+    }
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                TextInput::make('nama_pelanggan')
-                    ->label('Nama')
-                    ->maxLength(255)
-                    ->minLength(2)
-                    ->required(),
-                TextInput::make('nomor_telepon')
-                    ->label('Nomor Telepon')
-                    ->tel()
-                    ->unique(ignoreRecord: true)
-                    ->required(),
-                TextArea::make('alamat')
-                    ->label('Alamat')
-                    ->columnSpanFull(),
+                self::getForm()
             ]);
     }
 

@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use App\Models\Pembelian;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
@@ -28,30 +29,40 @@ class PembelianResource extends Resource
     {
         return $form
             ->schema([
-                // Field tanggal dengan default hari ini
-                DatePicker::make('tanggal_pembelian')
-                    ->label('Tanggal Pembelian')
-                    ->default(now())
-                    ->required()
-                    ->columnSpanFull(),
-                // Select supplier dengan create option
-                Select::make('supplier_id')
-                    ->label('Pilih Supplier')
-                    ->options(Supplier::all()->pluck('nama_perusahaan', 'id'))
-                    ->searchable()
-                    ->required()
-                    ->debounce(100)
-                    ->createOptionForm(SupplierResource::getForm())
-                    ->createOptionUsing(fn (array $data): int => Supplier::create($data)->id)
-                    ->reactive()
-                    ->afterStateUpdated(function ($state, callable $set) {
-                        $supplier = Supplier::find($state);
-                        $set('nomor_telepon', $supplier->nomor_telepon ?? null);
-                    }),
-                // Nomor telepon, hanya untuk tampil, disabled
-                TextInput::make('nomor_telepon')
-                    ->label('Nomor Telepon')
-                    ->disabled(),
+                Grid::make()
+                    ->schema([
+                        // Field tanggal dengan default hari ini
+                        DatePicker::make('tanggal_pembelian')
+                            ->label('Tanggal Pembelian')
+                            ->default(now())
+                            ->required(),
+                        // Select supplier dengan create option
+                        Select::make('supplier_id')
+                            ->label('Pilih Supplier')
+                            ->options(Supplier::all()->pluck('nama_perusahaan', 'id'))
+                            ->searchable()
+                            ->required()
+                            ->debounce(100)
+                            ->createOptionForm(SupplierResource::getForm())
+                            ->createOptionUsing(fn (array $data): int => Supplier::create($data)->id)
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                if ($state) {
+                                    $supplier = Supplier::find($state);
+                                    $set('nomor_telepon', $supplier->nomor_telepon ?? null);
+                                }
+                            })
+                            ->afterStateHydrated(function ($state, callable $set) {
+                                if ($state) {
+                                    $supplier = Supplier::find($state);
+                                    $set('nomor_telepon', $supplier->nomor_telepon ?? null);
+                                }
+                            }),
+                        // Nomor telepon, hanya untuk tampil, disabled
+                        TextInput::make('nomor_telepon')
+                            ->label('Nomor Telepon')
+                            ->disabled(),
+                    ])->columns(3),
             ]);
     }
 
@@ -72,6 +83,7 @@ class PembelianResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -80,12 +92,10 @@ class PembelianResource extends Resource
             ]);
     }
 
-
-
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\DetailPembeliansRelationManager::class,
         ];
     }
 
@@ -95,6 +105,7 @@ class PembelianResource extends Resource
             'index' => Pages\ListPembelians::route('/'),
             'create' => Pages\CreatePembelian::route('/create'),
             'edit' => Pages\EditPembelian::route('/{record}/edit'),
+            'view' => Pages\ViewPembelian::route('/{record}'),
         ];
     }
 }
