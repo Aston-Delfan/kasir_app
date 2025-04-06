@@ -5,6 +5,9 @@ namespace App\Filament\Resources\DetailPembelianResource\Pages;
 use App\Filament\Resources\DetailPembelianResource;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Actions\Action;
+use App\Filament\Resources\DetailPembelianResource\Widgets\DetailPembelianWidget;
+
 
 class CreateDetailPembelian extends CreateRecord
 {
@@ -21,4 +24,35 @@ class CreateDetailPembelian extends CreateRecord
     //     // Update record pembelian
     //     \App\Models\Pembelian::find($pembelianId)->update(['total_harga' => $total]);
     // }
+    protected function getFormActions(): array
+    {
+        return [
+            Action::make('create')
+                ->label('Simpan')
+                ->submit('create')
+                ->keyBindings(['mod+s']),
+        ];
+    }
+
+    protected function getRedirectUrl():string
+    {
+        $id = $this->record->pembelian_id;
+        return route(
+            'filament.admin.resources.detail-pembelians.create',['pembelian_id' => $id]
+        );
+    }
+
+    public function getFooterWidgetsColumns(): int | array
+    {
+        return 1;
+    }
+
+    public function getFooterWidgets(): array
+    {
+        return [
+            DetailPembelianWidget::make([
+                'record' => request('pembelian_id'),
+         ]),
+        ];
+    }
 }

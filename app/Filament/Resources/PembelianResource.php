@@ -32,7 +32,8 @@ class PembelianResource extends Resource
                 DatePicker::make('tanggal_pembelian')
                     ->label('Tanggal Pembelian')
                     ->default(now())
-                    ->required(),
+                    ->required()
+                    ->columnSpanFull(),
                 // Select supplier dengan create option
                 Select::make('supplier_id')
                     ->label('Pilih Supplier')
@@ -58,13 +59,13 @@ class PembelianResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('tanggal_pembelian')
-                    ->label('Tanggal'),
                 TextColumn::make('supplier.nama_perusahaan')
-                    ->label('Supplier'),
-                TextColumn::make('total_harga')
-                    ->label('Total Harga')
-                    ->money('IDR'),
+                    ->label('Nama Supplier'),
+                TextColumn::make('supplier.nama_kontak')
+                    ->label('Nama Kontak'),
+                TextColumn::make('tanggal_pembelian')
+                    ->label('Tanggal')
+                    ->dateTime('d F Y'),
             ])
             ->filters([
                 //
