@@ -44,9 +44,9 @@ class PelangganResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
+            ->schema(
                 self::getForm()
-            ]);
+            );
     }
 
     public static function table(Table $table): Table
