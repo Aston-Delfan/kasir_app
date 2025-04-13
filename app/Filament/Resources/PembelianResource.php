@@ -101,16 +101,6 @@ class PembelianResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\BulkAction::make('print')
-                        ->label('Cetak Pembelian Terpilih')
-                        ->icon('heroicon-o-printer')
-                        ->action(function (Tables\Actions\BulkAction $action, array $data): void {
-                            // Redirect to a custom route with the selected IDs
-                            $ids = collect($data)->keys()->join(',');
-                            $url = route('reports.pembelian.bulk', ['ids' => $ids]);
-                            $action->redirect($url);
-                        })
-                        ->deselectRecordsAfterCompletion(),
                 ]),
             ]);
     }

@@ -106,15 +106,6 @@ class PenjualanResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\BulkAction::make('print')
-                        ->label('Cetak Penjualan Terpilih')
-                        ->icon('heroicon-o-printer')
-                        ->action(function (Tables\Actions\BulkAction $action, array $data): void {
-                            $ids = collect($data)->keys()->join(',');
-                            $action->redirect(route('reports.penjualan.bulk', ['ids' => $ids])); // true untuk membuka di tab baru
-                        })
-                        ->openUrlInNewTab()
-                        ->deselectRecordsAfterCompletion(),
                 ]),
             ]);
     }
