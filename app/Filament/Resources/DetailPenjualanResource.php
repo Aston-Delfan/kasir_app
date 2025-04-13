@@ -18,6 +18,7 @@ use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\DetailPenjualanResource\Pages;
@@ -58,28 +59,50 @@ class DetailPenjualanResource extends Resource
                         ->disabled()
                         ->default($penjualan->pelanggan?->nomor_telepon),
                     ])->columns(3),
-                    BarcodeInput::make('barcode')
-                        ->label('Kode Barcode')
-                        ->nullable()
-                        ->placeholder('Scan atau masukkan kode barcode disini')
-                        ->helperText('Tekan Enter atau Tab setelah scan barcode')
-                        ->reactive()
-                        ->dehydrated(false)
-                        ->afterStateUpdated(function (string $state, Set $set, Get $get) {
-                            // Cari produk berdasarkan barcode
-                            $produk = Produk::where('barcode', $state)->first();
-                            if ($produk) {
-                                $jumlah = 1;
-                                $subtotal = $jumlah * $produk->harga;
+                    // BarcodeInput::make('barcode')
+                        // ->label('Kode Barcode')
+                        // ->nullable()
+                        // ->placeholder('Scan atau masukkan kode barcode disini')
+                        // ->helperText('Tekan Enter atau Tab setelah scan barcode')
+                        // ->reactive()
+                        // ->dehydrated(false)
+                        // ->autofocus() // Add autofocus to improve UX for scanning
+                        // ->afterStateUpdated(function (string $state, Set $set, Get $get) {
+                        //     if (empty($state)) return;
 
-                                $set('produk_id', $produk->id);
-                                $set('harga', $produk->harga);
-                                $set('subtotal', $subtotal);
-                                $set('jumlah_produk', 1);
-                                // Reset barcode field setelah produk ditemukan
-                                $set('barcode_scanner', '');
-                            }
-                        }),
+                        //     // Cari produk berdasarkan barcode
+                        //     $produk = Produk::where('barcode', $state)->first();
+                        //     if ($produk) {
+                        //         if ($produk->stok <= 0) {
+                        //             // Notify that stock is empty
+                        //             Notification::make()
+                        //                 ->warning()
+                        //                 ->title('Stok Habis')
+                        //                 ->body("Produk {$produk->nama_produk} tidak memiliki stok tersedia.")
+                        //                 ->send();
+                        //             $set('barcode', '');
+                        //             return;
+                        //         }
+
+                        //         $jumlah = 1;
+                        //         $subtotal = $jumlah * $produk->harga;
+
+                        //         $set('produk_id', $produk->id);
+                        //         $set('harga', $produk->harga);
+                        //         $set('subtotal', $subtotal);
+                        //         $set('jumlah_produk', 1);
+                        //         // Reset barcode field setelah produk ditemukan
+                        //         $set('barcode', '');
+                        //     } else {
+                        //         // Notify if product not found
+                        //         Notification::make()
+                        //             ->danger()
+                        //             ->title('Produk Tidak Ditemukan')
+                        //             ->body("Tidak ada produk dengan barcode: {$state}")
+                        //             ->send();
+                        //         $set('barcode', '');
+                        //     }
+                        // }),
                 Grid::make()
                     ->schema([
                         Select::make('produk_id')

@@ -41,9 +41,18 @@ class Produk extends Model
             $barcode = $prefix . $timestamp . $random;
 
             // Validasi barcode belum pernah digunakan
-            while (static::where('barcode', $barcode)->exists()) {
+            $attempts = 0;
+            $maxAttempts = 10;
+
+            while (static::where('barcode', $barcode)->exists() && $attempts < $maxAttempts) {
                 $random = Str::random(4);
                 $barcode = $prefix . $timestamp . $random;
+                $attempts++;
+            }
+
+            if ($attempts >= $maxAttempts) {
+                // Fallback to ensure uniqueness
+                $barcode = $prefix . $timestamp . Str::random(8);
             }
 
             return $barcode;
