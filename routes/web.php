@@ -60,3 +60,6 @@ Route::get('reports/pembelian-all', function (PembelianReportService $service) {
 Route::get('reports/penjualan-all', function (PenjualanReportService $service) {
     return $service->streamPdf();
 })->name('reports.penjualan.all');
+
+Route::get('/barcode/print/{id}', [\App\Http\Controllers\BarcodeController::class, 'printBarcode'])->name('barcode.print');
+Route::get('/barcode/print-bulk', [\App\Http\Controllers\BarcodeController::class, 'printBulkBarcode'])->name('barcode.print-bulk');

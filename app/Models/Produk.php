@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
+use Picqer\Barcode\BarcodeGeneratorPNG;
 
 class Produk extends Model
 {
@@ -15,7 +17,63 @@ class Produk extends Model
         'kategori',
         'stok',
         'harga',
+        'barcode',
     ];
+
+    public static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($produk) {
+            // Generate barcode jika belum ada
+            if (!$produk->barcode) {
+                $produk->barcode = static::generateUniqueBarcode();
+            }
+        });
+    }
+
+        // Method untuk generate unique barcode
+        public static function generateUniqueBarcode()
+        {
+            $prefix = 'PRD';
+            $timestamp = now()->format('YmdHis');
+            $random = Str::random(4);
+            $barcode = $prefix . $timestamp . $random;
+
+            // Validasi barcode belum pernah digunakan
+            while (static::where('barcode', $barcode)->exists()) {
+                $random = Str::random(4);
+                $barcode = $prefix . $timestamp . $random;
+            }
+
+            return $barcode;
+        }
+
+        // Method untuk mendapatkan barcode HTML
+        public function getBarcodeHtml()
+        {
+            if (!$this->barcode) {
+                return null;
+            }
+
+            $generator = new BarcodeGeneratorPNG();
+            $barcode = base64_encode($generator->getBarcode($this->barcode, $generator::TYPE_CODE_128));
+
+            return '<img src="data:image/png;base64,' . $barcode . '" alt="' . $this->barcode . '">';
+        }
+
+        // Method untuk mendapatkan barcode data URI
+        public function getBarcodeDataUri()
+        {
+            if (!$this->barcode) {
+                return null;
+            }
+
+            $generator = new BarcodeGeneratorPNG();
+            $barcode = base64_encode($generator->getBarcode($this->barcode, $generator::TYPE_CODE_128));
+
+            return 'data:image/png;base64,' . $barcode;
+        }
 
     public function suppliers()
     {
