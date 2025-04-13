@@ -80,11 +80,18 @@ class DetailPembelianResource extends Resource
                                 $subtotal = $jumlah * $produk->harga;
                                 $set('subtotal', $subtotal);
                                 $set('harga', $produk->harga);
+                            })
+                            ->afterStateHydrated(function ($state, callable $set) {
+                                if ($state) {
+                                    $produk = Produk::find($state);
+                                    $set('harga', $produk->harga ?? null);
+                                }
                             }),
                         TextInput::make('harga')
                             ->label('Harga')
                             ->disabled()
                             ->prefix('Rp ')
+                            ->reactive()
                         ,
                         TextInput::make('jumlah_produk')
                             ->label('Jumlah Produk')

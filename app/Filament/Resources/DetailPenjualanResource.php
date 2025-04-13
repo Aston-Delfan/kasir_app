@@ -136,6 +136,25 @@ class DetailPenjualanResource extends Resource
                             ->reactive()
                             ->debounce(600)
                             ->afterStateUpdated(function ($state, Get $get, Set $set) {
+                                    $produkId = $get('produk_id');
+                                    if ($produkId) {
+                                        $produk = Produk::find($produkId);
+                                        if ($produk && $state > $produk->stok) {
+                                            // Reset the quantity if it exceeds available stock
+                                            Notification::make()
+                                                ->danger()
+                                                ->title('Stok Tidak Cukup')
+                                                ->body("Stok {$produk->nama_produk} hanya tersedia {$produk->stok} item.")
+                                                ->send();
+
+                                        $set('jumlah_produk', $produk->stok);
+                                        $jumlah = $produk->stok;
+                                        $harga = $get('harga') ?: 0;
+                                        $subtotal = $jumlah * $harga;
+                                        $set('subtotal', $subtotal);
+                                        return;
+                                    }
+                                }
                                 $jumlah = $state;
                                 $harga = $get('harga') ?: 0;
                                 $subtotal = $jumlah * $harga;

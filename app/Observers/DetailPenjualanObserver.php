@@ -10,13 +10,25 @@ class DetailPenjualanObserver
     /**
      * Handle the DetailPenjualan "created" event.
      */
+    public function creating(DetailPenjualan $detailPenjualan): bool
+    {
+        $produk = Produk::find($detailPenjualan->produk_id);
+        if ($produk && $detailPenjualan->jumlah_produk > $produk->stok) {
+            return false; // Prevent creation if stock is insufficient
+        }
+        return true;
+    }
+
     public function created(DetailPenjualan $detailPenjualan): void
     {
         // Kurangi stok produk saat penjualan dibuat
         $produk = Produk::find($detailPenjualan->produk_id);
         if ($produk) {
-            $produk->stok -= $detailPenjualan->jumlah_produk;
-            $produk->save();
+            // Add safety check here as well
+            if ($produk->stok >= $detailPenjualan->jumlah_produk) {
+                $produk->stok -= $detailPenjualan->jumlah_produk;
+                $produk->save();
+            }
         }
 
         // Update total harga di tabel penjualan
