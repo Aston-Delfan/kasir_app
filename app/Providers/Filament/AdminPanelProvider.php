@@ -68,7 +68,7 @@ class AdminPanelProvider extends PanelProvider
                 ->setIcon('heroicon-o-user')
                 ->setNavigationGroup('Manajemen Pengguna')
                 ->shouldShowAvatarForm(
-                    value: true
+                    value: false
                 ),
             ])
             ->userMenuItems([

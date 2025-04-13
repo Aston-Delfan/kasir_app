@@ -14,6 +14,11 @@ class ListPenjualans extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
+            Actions\Action::make('printAll')
+                ->label('Cetak Semua')
+                ->icon('heroicon-o-printer')
+                ->url(route('reports.penjualan.all'))
+                ->openUrlInNewTab(),
         ];
     }
 }

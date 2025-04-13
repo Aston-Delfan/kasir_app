@@ -19,6 +19,11 @@ class PembelianReportService extends PdfReportService
             $query->where('id', $id);
         }
 
+        // Filter by array of IDs if provided
+        if (isset($filters['ids']) && !empty($filters['ids'])) {
+            $query->whereIn('id', $filters['ids']);
+        }
+
         // Apply date filters if provided
         if (isset($filters['date_from'])) {
             $query->whereDate('tanggal_pembelian', '>=', $filters['date_from']);
@@ -53,7 +58,19 @@ class PembelianReportService extends PdfReportService
             'filters' => $filters,
             'reportDate' => Carbon::now()->format('d F Y'),
             'title' => $id ? 'Detail Pembelian' : 'Laporan Pembelian',
+            'count' => $pembelians->count(),
         ];
+    }
+
+    /**
+     * Generate a PDF report for multiple purchases
+     *
+     * @param array $ids Array of purchase IDs
+     * @return \Illuminate\Http\Response
+     */
+    public function generateBulkPdf(array $ids)
+    {
+        return $this->streamPdf(null, ['ids' => $ids]);
     }
 
     /**

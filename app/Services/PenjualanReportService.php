@@ -19,6 +19,11 @@ class PenjualanReportService extends PdfReportService
             $query->where('id', $id);
         }
 
+        // Filter by array of IDs if provided
+        if (isset($filters['ids']) && !empty($filters['ids'])) {
+            $query->whereIn('id', $filters['ids']);
+        }
+
         // Apply date filters if provided
         if (isset($filters['date_from'])) {
             $query->whereDate('tanggal_penjualan', '>=', $filters['date_from']);
@@ -53,7 +58,19 @@ class PenjualanReportService extends PdfReportService
             'filters' => $filters,
             'reportDate' => Carbon::now()->format('d F Y'),
             'title' => $id ? 'Detail Penjualan' : 'Laporan Penjualan',
+            'count' => $penjualans->count(),
         ];
+    }
+
+    /**
+     * Generate a PDF report for multiple sales
+     *
+     * @param array $ids Array of sale IDs
+     * @return \Illuminate\Http\Response
+     */
+    public function generateBulkPdf(array $ids)
+    {
+        return $this->streamPdf(null, ['ids' => $ids]);
     }
 
     /**

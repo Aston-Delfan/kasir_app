@@ -31,9 +31,6 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                FileUpload::make('avatar_url')
-                    ->avatar()
-                    ->columnSpanFull(),
                 TextInput::make('name')
                     ->label('Nama')
                     ->maxLength(255)
@@ -65,8 +62,6 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                ImageColumn::make('avatar_url')
-                    ->circular(),
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('email')
