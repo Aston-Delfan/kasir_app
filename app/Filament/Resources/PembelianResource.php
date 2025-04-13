@@ -81,6 +81,10 @@ class PembelianResource extends Resource
                 TextColumn::make('tanggal_pembelian')
                     ->label('Tanggal')
                     ->dateTime('d F Y'),
+                TextColumn::make('total_harga')
+                    ->label('Total Harga')
+                    ->money('idr')
+                    ->default('-'),
             ])
             ->filters([
                 //

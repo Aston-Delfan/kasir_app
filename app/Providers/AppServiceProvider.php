@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\DetailPembelian;
 use App\Models\DetailPenjualan;
-use App\Observers\DetailPenjualanObserver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
+use App\Observers\DetailPembelianObserver;
+use App\Observers\DetailPenjualanObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,5 +26,6 @@ class AppServiceProvider extends ServiceProvider
     {
         Model::unguard();
         DetailPenjualan::observe(DetailPenjualanObserver::class);
+        DetailPembelian::observe(DetailPembelianObserver::class);
     }
 }

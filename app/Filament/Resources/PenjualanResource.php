@@ -4,11 +4,12 @@ namespace App\Filament\Resources;
 
 use Filament\Forms;
 use Filament\Tables;
-use App\Models\Pelanggan;
 use Filament\Forms\Form;
+use App\Models\Pelanggan;
 use App\Models\Penjualan;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
@@ -31,36 +32,43 @@ class PenjualanResource extends Resource
     {
         return $form
             ->schema([
-                // Field tanggal dengan default hari ini
-                DatePicker::make('tanggal_penjualan')
-                    ->label('Tanggal Penjualan')
-                    ->default(now())
-                    ->required()
-                    ->columnSpanFull(),
-                // Select pelanggan with nullable option
-                Select::make('pelanggan_id')
-                    ->label('Pilih Pelanggan')
-                    ->options(Pelanggan::all()->pluck('nama_pelanggan', 'id'))
-                    ->searchable()
-                    ->nullable() // Allow null selection
-                    ->debounce(600)
-                    ->createOptionForm(PelangganResource::getForm())
-                    ->createOptionUsing(fn (array $data): int => Pelanggan::create($data)->id)
-                    ->reactive()
-                    ->afterStateUpdated(function ($state, callable $set) {
-                        if ($state) {
-                            $pelanggan = Pelanggan::find($state);
-                            $set('nomor_telepon', $pelanggan->nomor_telepon ?? null);
-                        } else {
-                            $set('nomor_telepon', null);
-                        }
-                    })
-                    ->placeholder('Tanpa Pelanggan'), // Add a placeholder to indicate no selection
-                // Nomor telepon, hanya untuk tampil, disabled
-                TextInput::make('nomor_telepon')
-                    ->label('Nomor Telepon')
-                    ->disabled()
-                    ->nullable(),
+                Grid::make()
+                    ->schema([
+                        // Field tanggal dengan default hari ini
+                        DatePicker::make('tanggal_penjualan')
+                            ->label('Tanggal Penjualan')
+                            ->default(now())
+                            ->required(),
+                        // Select pelanggan with nullable option
+                        Select::make('pelanggan_id')
+                            ->label('Pilih Pelanggan')
+                            ->options(Pelanggan::all()->pluck('nama_pelanggan', 'id'))
+                            ->searchable()
+                            ->nullable() // Allow null selection
+                            ->debounce(600)
+                            ->createOptionForm(PelangganResource::getForm())
+                            ->createOptionUsing(fn (array $data): int => Pelanggan::create($data)->id)
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                if ($state) {
+                                    $pelanggan = Pelanggan::find($state);
+                                    $set('nomor_telepon', $pelanggan->nomor_telepon ?? null);
+                                } else {
+                                    $set('nomor_telepon', null);
+                                }
+                            })
+                            ->afterStateHydrated(function ($state, callable $set) {
+                                if ($state) {
+                                    $pelanggan = Pelanggan::find($state);
+                                    $set('nomor_telepon', $pelanggan->nomor_telepon ?? null);
+                                }
+                            })
+                            ->placeholder('Tanpa Pelanggan'), // Add a placeholder to indicate no selection
+                        // Nomor telepon, hanya untuk tampil, disabled
+                        TextInput::make('nomor_telepon')
+                            ->label('Nomor Telepon')
+                            ->disabled(),
+                    ])->columns(3),
             ]);
     }
 
@@ -76,6 +84,10 @@ class PenjualanResource extends Resource
                     ->default('-'),
                 TextColumn::make('pelanggan.nomor_telepon')
                     ->label('Nomor Telepon')
+                    ->default('-'),
+                TextColumn::make('total_harga')
+                    ->label('Total Harga')
+                    ->money('idr')
                     ->default('-'),
 
             ])
